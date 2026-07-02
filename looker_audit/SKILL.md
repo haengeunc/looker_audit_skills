@@ -88,33 +88,51 @@ Ensure data is moving and caching efficiently.
   ```bash
   echo '{"model":"system__activity","view":"pdt_event_log","fields":["pdt_event_log.view_name","pdt_event_log.model_name","pdt_event_log.action","pdt_event_log.error_reason","pdt_event_log.created_time"],"filters":{"pdt_event_log.action":"%error%","pdt_event_log.created_date":"24 hours"},"sorts":["pdt_event_log.created_time desc"]}' | looker-cli api query run_inline_query json - | jq
   ```
-### 4. LookML Code Quality & Anti-Patterns
-Scan the local LookML repository files for anti-patterns and code smells. Run these commands from the root of the LookML project repository.
+### 4. LookML Code Quality & Anti-Patterns (Remote Static Analysis)
+Scan remote LookML project files for anti-patterns using `looker-cli`.
 
-- **Wildcard in Includes**: Overly broad includes (e.g., `include: "*.view"`) can slow down validation and clutter the model. Scoped includes (e.g., `include: "/views/**/*.view"`) are preferred.
+- **Run Looker Validator**: First, trigger Looker's built-in validator to catch syntax errors and standard issues.
   ```bash
-  grep -rn 'include:\s*"*\*\.view' --include="*.model.lkml" .
+  looker-cli api project validate_project [PROJECT_ID]
   ```
 
-- **Missing Primary Keys**: Views without a primary key can cause incorrect symmetric aggregates and join issues. Every view intended for use as a "one" in a join must have a primary key.
+- **Wildcard in Includes**: Overly broad includes (e.g., `include: "*.view"`) can slow down validation. Scoped includes (e.g., `include: "/views/**/*.view"`) are preferred.
   ```bash
-  # List view files that do NOT contain a primary key definition
-  find . -name "*.view.lkml" -exec grep -L "primary_key: yes" {} +
+  for file in $(looker-cli api project all_project_files [PROJECT_ID] | jq -r '.[] | select(.type=="model") | .path'); do
+    looker-cli project file cat [PROJECT_ID] "$file" | grep 'include:\s*"*\*\.view' && echo "Wildcard include found in $file"
+  done
+  ```
+
+- **Missing Primary Keys**: Views without a primary key can cause incorrect symmetric aggregates. Ensure that primary keys are defined for all views used in joins.
+
+ # List view files that do NOT contain a primary key definition
+  ```bash
+  for file in $(looker-cli api project all_project_files [PROJECT_ID] | jq -r '.[] | select(.type=="view") | .path'); do
+    looker-cli project file cat [PROJECT_ID] "$file" | grep -q "primary_key: yes" || echo "Missing primary key in $file"
+  done
   ```
 
 - **Hardcoded Database References**: Avoid hardcoding table or column names. Always use LookML substitution syntax `${TABLE}.column` or `${view_name.field_name}` to allow Looker to handle scoping and aliases correctly.
-  ```bash
+
   # Find sql parameters with dots (likely table.column) but no substitution syntax
-  grep -rn 'sql:' --include="*.lkml" . | grep -v '\${' | grep '\.'
+  ```bash
+  for file in $(looker-cli api project all_project_files [PROJECT_ID] | jq -r '.[] | select(.extension==".lkml") | .path'); do
+    looker-cli project file cat [PROJECT_ID] "$file" | grep 'sql:' | grep -v '\${' | grep '\.' && echo "Hardcoded ref found in $file"
+  done
   ```
 
 - **Using Number Type for IDs**: Dimension IDs should usually be `type: string` to prevent accidental aggregation (e.g., summing IDs).
   ```bash
-  grep -rn "type:\s*number" --include="*.view.lkml" . | grep -i "id"
+  for file in $(looker-cli api project all_project_files [PROJECT_ID] | jq -r '.[] | select(.type=="view") | .path'); do
+    looker-cli project file cat [PROJECT_ID] "$file" | grep "type:\s*number" | grep -i "id" && echo "Number ID found in $file"
+  done
   ```
 
 - **Repeated Drill Fields (Use Sets)**: Avoid repeating the same list of fields in `drill_fields` across multiple dimensions. Define a `set` and reference it using `drill_fields: [set_name*]`.
   - Scan for identical arrays in `drill_fields` parameters manually or check for lack of `set` usage in views with many drill fields.
+
+> [!NOTE]
+> **Performance Tip**: For very large projects, these loops can be slow as they fetch files one by one. If you have the repository cloned locally, you can use standard `grep` commands (e.g., `grep -rn 'include:\s*"*\*\.view' .`) which are much faster.
 
 ### 5. User, Content, and Schedule Management
 Audit the instance for inactive assets, orphaned schedules, and schedule hotspots using System Activity.

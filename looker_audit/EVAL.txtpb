@@ -50,7 +50,7 @@ cases {
 
 cases {
   name: "find_missing_primary_keys"
-  prompt: "Scan the local LookML repository for any view files that are missing a primary key definition."
+  prompt: "Scan the LookML repository for any view files that are missing a primary key definition."
   expectations: "Agent identifies view files without `primary_key: yes`."
-  expectations: "Agent uses `grep` or `find` commands on local files."
+  expectations: "Agent uses `looker-cli` project file commands or local file scanning."
 }
