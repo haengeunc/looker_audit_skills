@@ -1,0 +1,56 @@
+suite_name: "looker_audit"
+timeout_seconds: 300
+
+cases {
+  name: "find_auto_refresh_dashboards"
+  prompt: "List all dashboards in the instance that have auto-refresh enabled."
+  expectations: "Agent returns a list of dashboards with auto-refresh."
+  expectations: "The output includes dashboard ID, title, and refresh interval."
+  expectations: "The queries correctly filter for non-null refresh intervals."
+}
+
+cases {
+  name: "find_dashboards_with_dynamic_fields"
+  prompt: "Identify dashboards that are using excessive dynamic fields (more than 3 per tile or query)."
+  expectations: "Agent returns a list of dashboards exceeding the dynamic fields threshold."
+  expectations: "The output includes dashboard details and the count of dynamic fields."
+  expectations: "The query uses `query.count_of_dynamic_fields`."
+}
+
+cases {
+  name: "find_unused_fields"
+  prompt: "Identify fields that have never been used in any query."
+  expectations: "Agent returns a list of unused fields."
+  expectations: "The output includes model, explore, and field name."
+  expectations: "The query filters for `times_used` equal to 0."
+}
+
+cases {
+  name: "find_failed_pdts"
+  prompt: "Check for any Persistent Derived Tables (PDTs) that have failed to build in the last 24 hours."
+  expectations: "Agent returns a list of failed PDTs with error reasons."
+  expectations: "The query filters `pdt_event_log.action` with `%error%`."
+  expectations: "The agent uses standard input piping for the JSON body if using `run_inline_query`."
+}
+
+cases {
+  name: "find_failed_datagroups"
+  prompt: "List all datagroups that are currently in a failed state or have trigger errors."
+  expectations: "Agent returns a list of failed datagroups."
+  expectations: "The agent checks `trigger_error`."
+}
+
+cases {
+  name: "find_slow_queries"
+  prompt: "Identify queries from Explores, Dashboards, and Looks run in the past 30 days that took longer than 10 seconds to execute."
+  expectations: "Agent returns a list of slow queries."
+  expectations: "The output includes query details and execution time."
+  expectations: "The query filters for execution time > 10 seconds and created date in the last 30 days."
+}
+
+cases {
+  name: "find_missing_primary_keys"
+  prompt: "Scan the local LookML repository for any view files that are missing a primary key definition."
+  expectations: "Agent identifies view files without `primary_key: yes`."
+  expectations: "Agent uses `grep` or `find` commands on local files."
+}
