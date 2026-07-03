@@ -2,12 +2,11 @@
 
 Conduct Looker audit by leveraging the System Activity dashboards and Explores to make observations and provide recommendations against Looker’s best practices. Prioritise cost impact, isolate issues and clean up the bloat. Health check or similar review should be performed every 12 months, covering:
 
-1. Looker instance infrastructure performance
-2. Query performance
-3. Content performance
-4. LookML review
-5. Access controls (Groups, Roles, Content Access, User Attributes)
-6. PDTs and Schedules
+1. Query performance
+2. Content performance
+3. LookML review
+4. User activity
+5. PDTs and Schedules
 
 The Looker query execution lifecycle is divided into four distinct, sequential phases that track the journey of a query from LookML compilation to final browser rendering:
 
