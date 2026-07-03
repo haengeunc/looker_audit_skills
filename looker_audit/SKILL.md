@@ -9,7 +9,7 @@ description: >-
 
 # Looker Audit & Health Check
 
-This skill guides you through auditing a Looker instance using `looker-cli` and System Activity to identify performance bottlenecks, governance gaps, and cleanup opportunities.
+This skill guides you through auditing a Looker instance using `looker-cli` and System Activity to identify performance bottlenecks, governance gaps, and cleanup opportunities. It flags the violation of best practices and suggests optimal fixes e.g. code snippets or step-by-step guide. **IMPORTANT**: When you suggest code snippets or step-by-step guide, you MUST include the exact URL pointing to the specific file and line number(s) of the violation. Construct the full link carefully using the file path, repository URL. Append the line suffix (e.g. #L16 or #L16-L19) to the URL based on the line numbers discovered in the tool output.
 
 ## ⚡ Quick Health Audits (Pulse Commands)
 Before running detailed custom queries, you can use pre-packaged `looker-cli health` commands for a rapid overview of instance health. These are often faster than inline queries for a quick pulse check.
@@ -41,8 +41,6 @@ Before running detailed custom queries, you can use pre-packaged `looker-cli hea
 > *   Use **System Activity Inline Queries** (Checklist below) when you need deep drill-downs, specific timeframes (e.g., 90 days vs 7 days), or custom filtering (e.g., filtering by a specific user or custom thresholds).
 
 ## 📋 Audit Checklist
-
-
 
 ### 1. Dashboard Health & Complexity
 Excessive complexity on dashboards leads to browser lag and poor user experience.
@@ -89,7 +87,7 @@ Ensure data is moving and caching efficiently.
   echo '{"model":"system__activity","view":"pdt_event_log","fields":["pdt_event_log.view_name","pdt_event_log.model_name","pdt_event_log.action","pdt_event_log.error_reason","pdt_event_log.created_time"],"filters":{"pdt_event_log.action":"%error%","pdt_event_log.created_date":"24 hours"},"sorts":["pdt_event_log.created_time desc"]}' | looker-cli api query run_inline_query json - | jq
   ```
 ### 4. LookML Code Quality & Anti-Patterns (Remote Static Analysis)
-Scan remote LookML project files for anti-patterns using `looker-cli`.
+Scan remote LookML project files for anti-patterns using `looker-cli`. For more detailed analysis of the LookML review, refer to [LookML Reviewer Skill](lookml_reviewer.md).
 
 - **Run Looker Validator**: First, trigger Looker's built-in validator to catch syntax errors and standard issues.
   ```bash
@@ -103,18 +101,14 @@ Scan remote LookML project files for anti-patterns using `looker-cli`.
   done
   ```
 
-- **Missing Primary Keys**: Views without a primary key can cause incorrect symmetric aggregates. Ensure that primary keys are defined for all views used in joins.
-
- # List view files that do NOT contain a primary key definition
+- **Missing Primary Keys**: Views without a primary key can cause incorrect symmetric aggregates. Ensure that primary keys are defined for all views used in joins. List view files that do NOT contain a primary key definition.
   ```bash
   for file in $(looker-cli api project all_project_files [PROJECT_ID] | jq -r '.[] | select(.type=="view") | .path'); do
     looker-cli project file cat [PROJECT_ID] "$file" | grep -q "primary_key: yes" || echo "Missing primary key in $file"
   done
   ```
 
-- **Hardcoded Database References**: Avoid hardcoding table or column names. Always use LookML substitution syntax `${TABLE}.column` or `${view_name.field_name}` to allow Looker to handle scoping and aliases correctly.
-
-  # Find sql parameters with dots (likely table.column) but no substitution syntax
+- **DRY principle - Hardcoded Database References**: Avoid hardcoding table or column names. Always use LookML substitution syntax `${TABLE}.column` or `${view_name.field_name}` to allow Looker to handle scoping and aliases correctly. Find sql parameters with dots (likely table.column) but no substitution syntax.
   ```bash
   for file in $(looker-cli api project all_project_files [PROJECT_ID] | jq -r '.[] | select(.extension==".lkml") | .path'); do
     looker-cli project file cat [PROJECT_ID] "$file" | grep 'sql:' | grep -v '\${' | grep '\.' && echo "Hardcoded ref found in $file"
@@ -167,14 +161,14 @@ Audit the instance for inactive assets, orphaned schedules, and schedule hotspot
 
 ## 🛡️ Best Practices & Gotchas
 
-
-
-
 - **Piping JSON**: Always use `echo '...' | looker-cli ... json -` to pass inline JSON to `run_inline_query`. Do NOT pass the JSON string directly as an argument, or you will get a "file name too long" error.
 - **Filter Wildcards**: Use `%` (SQL style) instead of `*` for string filters in `run_inline_query` on System Activity (e.g., `%error%`).
 - **Timeframes**: The `history` table is time-bound. A field or explore showing as "unused" in 90 days might still be used for annual reporting. Verify before deleting.
 - **Hidden Fields**: `hidden: yes` fields might still be used in joins or calculations. Do not delete without checking dependencies.
 - **Unused Fields**: fields identified as not used might still be used in other explores via hub & spoke model. Check if the fields are being referenced via `extends` or `refinements` in spoke repositories.
+- **Holistic Review**: You must analyze the instance or repositories as a whole to provide a holistic review.
+- **Anti-Hallucination Guardrail**: NEVER hallucinate or assume data. Always run the query first and report only the actual results. If no data matches, report that explicitly.
+- **Performance Warning (Remote Loops)**: The remote file scanning loops in Section 4 (e.g., `for file in ...`) fetch files one by one via API. This can be very slow and may time out on large projects (e.g., in evaluation environments). If speed is critical or timeouts occur, recommend a local clone and standard `grep`.
 
 ## 📚 References
 
