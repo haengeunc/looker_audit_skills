@@ -21,6 +21,10 @@ This skill guides you through auditing a Looker instance using `looker-cli` and 
 > 4. **Immediate Action**: Begin your audit **immediately** using `looker-cli` or API queries. Do not waste turns exploring directory structures or searching for "Looker" keywords in the workspace.
 > 5. **Trust Empty Results**: If a query for violations (e.g., slow queries, dynamic fields > 3) returns an empty list, it means there are **no violations** in that category. Do **NOT** assume the query failed or that data is missing. Do **NOT** pivot to filesystem searches to "find" the violations. Report the clean result clearly.
 > 6. **Stick to Checklist Queries**: Use the provided inline query examples directly. Do **NOT** write complex custom scripts (e.g., Python pipelines) to re-invent logic (e.g., inventorying all fields manually) if a single System Activity query can provide the answer. Simplicity is speed.
+> 7. **Graceful Degradation (Stop Hunting)**: If you identify a violation but cannot retrieve the exact LookML file or line numbers via the API/CLI (e.g., due to 404s or broken connections), **STOP HUNTING**. Do **NOT** pivot to filesystem searches. Report the violation clearly with the identifiers you *do* have (View Name, File Name, Dashboard ID) and state that exact line numbers were inaccessible.
+
+> [!TIP]
+> **Correct File Paths**: If `looker-cli api project project_file` returns empty or 404, do not guess the path. Use `looker-cli api project all_project_files [project_id]` to list all files and their correct paths first.
 
 
 # 🔁 Execution Workflow
