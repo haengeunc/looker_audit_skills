@@ -2,11 +2,32 @@ suite_name: "looker_audit"
 timeout_seconds: 300
 
 cases {
+  name: "general_health_audit"
+  prompt: "Run a general health check on my Looker instance and tell me if anything is wrong."
+  timeout_seconds: 600
+  expectations: "Agent follows the 3-tiered audit strategy."
+  expectations: "Agent starts with high-level health audits (e.g., Pulse commands) for a fast initial assessment."
+  expectations: "Agent identifies top bottlenecks or errors if present."
+  expectations: "If no issues are found, agent clearly states the instance appears healthy."
+}
+
+cases {
+  name: "root_cause_telemetry_slow_dashboard"
+  prompt: "Find a slow dashboard in the instance and determine the root cause of its latency."
+  timeout_seconds: 600
+  expectations: "Agent identifies a slow dashboard."
+  expectations: "Agent traces the root cause beyond just reporting the latency (e.g., checking tile bloat, dynamic fields, caching)."
+  expectations: "Agent suggests specific LookML or configuration fixes."
+  expectations: "Agent provides links to relevant files if LookML issues are suspected."
+}
+
+cases {
   name: "find_auto_refresh_dashboards"
   prompt: "List all dashboards in the instance that have auto-refresh enabled."
   expectations: "Agent returns a list of dashboards with auto-refresh."
   expectations: "The output includes dashboard ID, title, and refresh interval."
   expectations: "The queries correctly filter for non-null refresh intervals."
+  expectations: "If no dashboards have auto-refresh, agent clearly states this."
 }
 
 cases {
@@ -15,6 +36,7 @@ cases {
   expectations: "Agent returns a list of dashboards exceeding the dynamic fields threshold."
   expectations: "The output includes dashboard details and the count of dynamic fields."
   expectations: "The query uses `query.count_of_dynamic_fields`."
+  expectations: "If no such dashboards are found, agent clearly states this."
 }
 
 cases {
@@ -23,6 +45,7 @@ cases {
   expectations: "Agent returns a list of unused fields."
   expectations: "The output includes model, explore, and field name."
   expectations: "The query filters for `times_used` equal to 0."
+  expectations: "If no unused fields are found, agent clearly states this."
 }
 
 cases {
@@ -31,6 +54,7 @@ cases {
   expectations: "Agent returns a list of failed PDTs with error reasons."
   expectations: "The query filters `pdt_event_log.action` with `%error%`."
   expectations: "The agent uses standard input piping for the JSON body if using `run_inline_query`."
+  expectations: "If no failed PDTs are found, agent clearly states this."
 }
 
 cases {
@@ -38,6 +62,7 @@ cases {
   prompt: "List all datagroups that are currently in a failed state or have trigger errors."
   expectations: "Agent returns a list of failed datagroups."
   expectations: "The agent checks `trigger_error`."
+  expectations: "If no failed datagroups are found, agent clearly states this."
 }
 
 cases {
@@ -46,11 +71,13 @@ cases {
   expectations: "Agent returns a list of slow queries."
   expectations: "The output includes query details and execution time."
   expectations: "The query filters for execution time > 10 seconds and created date in the last 30 days."
+  expectations: "If no slow queries are found, agent clearly states this."
 }
 
 cases {
   name: "find_missing_primary_keys"
   prompt: "Scan the LookML repository for any view files that are missing a primary key definition."
   expectations: "Agent identifies view files without `primary_key: yes`."
-  expectations: "Agent uses `looker-cli` project file commands or local file scanning."
+  expectations: "Agent uses efficient scanning methods (e.g., local `grep` if repo is local) or handles potential slowness gracefully."
+  expectations: "Agent provides the exact URL or file link with line numbers for the violations."
 }
