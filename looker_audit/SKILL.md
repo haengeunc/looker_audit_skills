@@ -9,9 +9,21 @@ description: >-
 
 # Looker Audit & Health Check
 
-This skill guides you through auditing a Looker instance using `looker-cli` and System Activity to identify performance bottlenecks, governance gaps, and cleanup opportunities. It flags the violation of best practices and suggests optimal fixes e.g. code snippets or step-by-step guide. **IMPORTANT**: When you suggest code snippets or step-by-step guide, you MUST include the exact URL pointing to the specific file and line number(s) of the violation. Construct the full link carefully using the file path, repository URL. Append the line suffix (e.g. #L16 or #L16-L19) to the URL based on the line numbers discovered in the tool output.
+This skill guides you through auditing a Looker instance using `looker-cli` and System Activity to identify performance bottlenecks, governance gaps, and cleanup opportunities. It flags the violation of best practices and suggests optimal fixes e.g. code snippets or step-by-step guide. 
 
-## ⚡ Quick Health Audits (Pulse Commands)
+**IMPORTANT**: When you suggest code snippets or step-by-step guide, you MUST include the exact URL pointing to the specific file and line number(s) of the violation. Construct the full link carefully using the file path, repository URL. Append the line suffix (e.g. #L16 or #L16-L19) to the URL based on the line numbers discovered in the tool output.
+
+# 🔁 Execution Workflow
+
+Follow this three-tiered audit strategy to move from symptoms to structural root causes: 
+
+1. **High-level Health audits**: Use Pulse/Vacuum commands for a broad, fast initial assessment (e.g., "Is the instance healthy? What are the top 5 slow things?").
+2. **Drill-down review**: Use System Activity Inline Queries (refer to audit checklist below) for deep drill-downs, specific timeframes (e.g., 90 days vs 7 days), or custom filtering (e.g., filtering by a specific user or custom thresholds).
+3. **Root-Cause Telemetry over Static Metrics**: Do not simply flag an issue. When a bottleneck is identified, immediately trace the root cause by cross-referencing relevant areas and identify what is causing latencies or failures (e.g. tile bloat, un-cached Explores, or missing required partition filters) to help guide developers to fix the underlying LookML.
+
+
+
+## ⚡ High-level Health Audits
 Before running detailed custom queries, you can use pre-packaged `looker-cli health` commands for a rapid overview of instance health. These are often faster than inline queries for a quick pulse check.
 
 - **Dashboard Performance**: Find dashboards with queries slower than 30 seconds in the last 7 days.
@@ -30,20 +42,16 @@ Before running detailed custom queries, you can use pre-packaged `looker-cli hea
   ```bash
   looker-cli health pulse schedule-failures
   ```
-- **Database Connections**: Verify connection status and query volume.
+- **Database Connections**: Verify connection status and query volume. Look for high latency (> 5 seconds), large result sets (> 1M rows), or stale tests.
   ```bash
   looker-cli health pulse db-connections
   ```
 
-> [!TIP]
-> **Audit Strategy**:
-> *   Use **Pulse/Vacuum commands** for a broad, fast initial assessment (e.g., "Is the instance healthy? What are the top 5 slow things?").
-> *   Use **System Activity Inline Queries** (Checklist below) when you need deep drill-downs, specific timeframes (e.g., 90 days vs 7 days), or custom filtering (e.g., filtering by a specific user or custom thresholds).
 
 ## 📋 Audit Checklist
 
 ### 1. Dashboard Health & Complexity
-Excessive complexity on dashboards leads to browser lag and poor user experience.
+Excessive complexity on dashboards leads to browser lag and poor user experience. Look for dashboards with > 20 tiles or average query times > 30 seconds.
 
 - **Auto-Refresh**: Identify dashboards running unnecessary constant queries.
   ```bash
@@ -56,7 +64,7 @@ Excessive complexity on dashboards leads to browser lag and poor user experience
   ```
 
 ### 2. Unused LookML Components (Last 90 Days)
-Clean up debt by removing components that aren't being used.
+Clean up debt by removing components that aren't being used. Consider Explores/Fields with 0 usage, or Models with very low usage (< 10 queries).
 
 - **Unused Fields**:
   ```bash
@@ -76,7 +84,7 @@ Clean up debt by removing components that aren't being used.
 
 ### 3. Pipeline & Cache Health
 
-Ensure data is moving and caching efficiently.
+Ensure data is moving and caching efficiently. Check for stale data (models where max build time is older than DB's max update time).
 
 - **Failed Datagroups**:
   ```bash
@@ -125,11 +133,9 @@ Scan remote LookML project files for anti-patterns using `looker-cli`. For more 
 - **Repeated Drill Fields (Use Sets)**: Avoid repeating the same list of fields in `drill_fields` across multiple dimensions. Define a `set` and reference it using `drill_fields: [set_name*]`.
   - Scan for identical arrays in `drill_fields` parameters manually or check for lack of `set` usage in views with many drill fields.
 
-> [!NOTE]
-> **Performance Tip**: For very large projects, these loops can be slow as they fetch files one by one. If you have the repository cloned locally, you can use standard `grep` commands (e.g., `grep -rn 'include:\s*"*\*\.view' .`) which are much faster.
 
 ### 5. User, Content, and Schedule Management
-Audit the instance for inactive assets, orphaned schedules, and schedule hotspots using System Activity.
+Audit the instance for inactive assets, orphaned schedules, and schedule hotspots using System Activity. Look for high-volume schedules (> 1/hr) or stale schedules (not run in 30 days).
 
 - **Inactive Accounts (No Login in 90 Days)**:
   ```bash
