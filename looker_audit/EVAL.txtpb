@@ -73,11 +73,4 @@ cases {
   expectations: "The query filters for execution time > 10 seconds and created date in the last 30 days."
   expectations: "If no slow queries are found, agent clearly states this."
 }
-
-cases {
-  name: "find_missing_primary_keys"
-  prompt: "Scan the LookML repository for any view files that are missing a primary key definition."
-  expectations: "Agent identifies view files without `primary_key: yes`."
-  expectations: "Agent uses efficient scanning methods (e.g., local `grep` if repo is local) or handles potential slowness gracefully."
-  expectations: "Agent provides the exact URL or file link with line numbers for the violations."
 }
