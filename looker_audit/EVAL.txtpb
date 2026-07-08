@@ -73,4 +73,3 @@ cases {
   expectations: "The query filters for execution time > 10 seconds and created date in the last 30 days."
   expectations: "If no slow queries are found, agent clearly states this."
 }
-}

@@ -13,6 +13,8 @@ description: >-
 > ## ⚠️ Rules of Engagement (CRITICAL)
 > 1. **System Activity First**: For all operational metrics (Performance, Errors, Usage, Dynamic Fields, Datagroup/PDT operational status), you **MUST** query System Activity or use `looker-cli health` commands.
 > 2. **No Operational File Scans**: Do **NOT** read LookML files to deduce operational state or verify usage history.
+> 3. **Skip Filesystem Grounding**: You are **ALREADY** in the correct environment. Do **NOT** search the filesystem (e.g., `find_by_name`, `ls -R`, or `grep_search`) to locate Looker configuration files, projects, or credentials. Assume `looker-cli` is pre-authenticated and ready.
+> 4. **Immediate Action**: Begin your audit **immediately** using `looker-cli` or API queries. Do not waste turns exploring directory structures or searching for "Looker" keywords in the workspace.
 
 This skill guides you through auditing a Looker instance using `looker-cli` and System Activity to identify performance bottlenecks, governance gaps, and cleanup opportunities. It flags the violation of best practices and suggests optimal fixes e.g. code snippets or step-by-step guide. 
 
