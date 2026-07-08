@@ -19,6 +19,8 @@ This skill guides you through auditing a Looker instance using `looker-cli` and 
 > 2. **No Operational File Scans**: Do **NOT** read LookML files to deduce operational state or verify usage history.
 > 3. **Skip Filesystem Grounding**: You are **ALREADY** in the correct environment. Do **NOT** search the filesystem (e.g., `find_by_name`, `ls -R`, or `grep_search`) to locate Looker configuration files, projects, or credentials. Do **NOT** use `find`, `ls`, or `grep` commands/tools under any circumstances for operational audits. Assume `looker-cli` is pre-authenticated and ready.
 > 4. **Immediate Action**: Begin your audit **immediately** using `looker-cli` or API queries. Do not waste turns exploring directory structures or searching for "Looker" keywords in the workspace.
+> 5. **Trust Empty Results**: If a query for violations (e.g., slow queries, dynamic fields > 3) returns an empty list, it means there are **no violations** in that category. Do **NOT** assume the query failed or that data is missing. Do **NOT** pivot to filesystem searches to "find" the violations. Report the clean result clearly.
+> 6. **Stick to Checklist Queries**: Use the provided inline query examples directly. Do **NOT** write complex custom scripts (e.g., Python pipelines) to re-invent logic (e.g., inventorying all fields manually) if a single System Activity query can provide the answer. Simplicity is speed.
 
 
 # 🔁 Execution Workflow
