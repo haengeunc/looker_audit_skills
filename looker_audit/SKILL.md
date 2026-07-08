@@ -13,11 +13,12 @@ This skill guides you through auditing a Looker instance using `looker-cli` and 
 
 > [!IMPORTANT]
 > ## ⚠️ Rules of Engagement (CRITICAL)
-> 1. **Strictly API/CLI Only**: All auditing MUST be done via `looker-cli` or System Activity API calls.
-> 2. **NO Filesystem Exploration**: Do **NOT** use `find`, `grep`, `ls`, `code_search`, or `find_by_name` to search the local filesystem. You are already in the correct environment. Assume `looker-cli` is ready.
-> 3. **Immediate Action**: Run your first `looker-cli` command in **Step 1**. Do not waste turns exploring directory structures or reading files.
-> 4. **Trust the API**: If a query returns empty or an error (e.g., connection failed), report that result. Do **NOT** attempt to "fix" it by scanning LookML files or searching the disk.
-> 5. **No Custom Pipelines**: Use the provided inline query examples directly. Do **NOT** write Python scripts or complex pipelines to inventory fields or analyze data if a single query can do it.
+> 1. **Strictly API/CLI Only**: All operational auditing MUST be done via `looker-cli` or System Activity.
+> 2. **NO Local Filesystem Scans**: Do **NOT** use `find`, `grep`, `ls`, `code_search`, or `find_by_name` to search the local filesystem (e.g., `google3/`). You are auditing a remote/containerized instance.
+> 3. **Immediate Action**: Run your first `looker-cli` or API command in **Step 1**. Do not waste turns exploring directories.
+> 4. **File Paths via API Only**: If you need to identify file paths or line numbers, you **MUST** use `looker-cli api project all_project_files [project_id]` or `project_file`. Do **NOT** use local filesystem tools to find them.
+> 5. **Graceful Degradation**: If the API fails to return file paths or details (e.g., 404), **STOP**. Report the violation using the identifiers you have (View Name, Model Name, Dashboard ID). Do **NOT** pivot to local filesystem searches.
+> 6. **No Custom Pipelines**: Use inline queries directly. Do **NOT** write Python scripts or pipelines.
 
 
 # 🔁 Execution Workflow
@@ -26,7 +27,7 @@ Follow this three-tiered audit strategy to move from symptoms to structural root
 
 1. **High-level Health audits**: Use Pulse/Vacuum commands for a broad, fast initial assessment (e.g., "Is the instance healthy? What are the top 5 slow things?").
 2. **Drill-down review**: Use System Activity Inline Queries (refer to audit checklist below) for deep drill-downs, specific timeframes (e.g., 90 days vs 7 days), or custom filtering (e.g., filtering by a specific user or custom thresholds).
-3. **Root-Cause Telemetry over Static Metrics**: Do not simply flag an issue. When a bottleneck is identified, immediately trace the root cause by cross-referencing relevant areas and identify what is causing latencies or failures (e.g. tile bloat, un-cached Explores, or missing required partition filters) to help guide developers to fix the underlying LookML.
+3. **Root-Cause Telemetry over Static Metrics**: Do not simply flag an issue. When a bottleneck is identified, immediately trace the root cause by cross-referencing relevant areas and identify what is causing latencies or failures (e.g. tile bloat, un-cached Explores, or missing required partition filters) to help guide developers to fix the underlying LookML. **If LookML issues are suspected, you MUST provide full paths to the files (discovered via API as per Rule 4).**
 
 
 
