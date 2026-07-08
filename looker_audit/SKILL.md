@@ -17,7 +17,7 @@ This skill guides you through auditing a Looker instance using `looker-cli` and 
 > ## ⚠️ Rules of Engagement (CRITICAL)
 > 1. **System Activity First**: For all operational metrics (Performance, Errors, Usage, Dynamic Fields, Datagroup/PDT operational status), you **MUST** query System Activity or use `looker-cli health` commands.
 > 2. **No Operational File Scans**: Do **NOT** read LookML files to deduce operational state or verify usage history.
-> 3. **Skip Filesystem Grounding**: You are **ALREADY** in the correct environment. Do **NOT** search the filesystem (e.g., `find_by_name`, `ls -R`, or `grep_search`) to locate Looker configuration files, projects, or credentials. Assume `looker-cli` is pre-authenticated and ready.
+> 3. **Skip Filesystem Grounding**: You are **ALREADY** in the correct environment. Do **NOT** search the filesystem (e.g., `find_by_name`, `ls -R`, or `grep_search`) to locate Looker configuration files, projects, or credentials. Do **NOT** use `find`, `ls`, or `grep` commands/tools under any circumstances for operational audits. Assume `looker-cli` is pre-authenticated and ready.
 > 4. **Immediate Action**: Begin your audit **immediately** using `looker-cli` or API queries. Do not waste turns exploring directory structures or searching for "Looker" keywords in the workspace.
 
 
@@ -27,7 +27,7 @@ Follow this three-tiered audit strategy to move from symptoms to structural root
 
 1. **High-level Health audits**: Use Pulse/Vacuum commands for a broad, fast initial assessment (e.g., "Is the instance healthy? What are the top 5 slow things?").
 2. **Drill-down review**: Use System Activity Inline Queries (refer to audit checklist below) for deep drill-downs, specific timeframes (e.g., 90 days vs 7 days), or custom filtering (e.g., filtering by a specific user or custom thresholds).
-3. **Root-Cause Telemetry over Static Metrics**: Do not simply flag an issue. When a bottleneck is identified, immediately trace the root cause by cross-referencing relevant areas and identify what is causing latencies or failures (e.g. tile bloat, un-cached Explores, or missing required partition filters) to help guide developers to fix the underlying LookML.
+3. **Root-Cause Telemetry over Static Metrics**: Do not simply flag an issue. When a bottleneck is identified, immediately trace the root cause by cross-referencing relevant areas and identify what is causing latencies or failures (e.g. tile bloat, un-cached Explores, or missing required partition filters) to help guide developers to fix the underlying LookML. **If LookML issues are suspected, you MUST provide full URLs to the files with line numbers as instructed above.**
 
 
 
