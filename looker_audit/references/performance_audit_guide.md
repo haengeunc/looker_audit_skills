@@ -45,7 +45,7 @@ The Looker query execution lifecycle is divided into four distinct, sequential p
     - Avoid full outer join as this forces Looker to scan both entire tables and ignores partition and cluster pruning on both sides of the join.
   - **Aggregation:**
     - Implement **Aggregate Awareness** to build database roll-ups for high-volume tiles e.g. raw records to the daily or hourly granularity.
-  - **Primary key:** Check for any dynamic function e.g. ROW_NUMBER() or concatenation in primary keys defined directly in LookML views - this forces Looker to execute manipulation on every single row inside subqueries. Recommend using base database joins instead (in upstream ETL pipeline) or inside a Persistent Derived Table. 
+  - **Manipulation in Primary key:** Check for any dynamic function e.g. ROW_NUMBER() or concatenation in primary keys defined directly in LookML views - this forces Looker to execute manipulation on every single row inside subqueries. Recommend using base database joins instead (in upstream ETL pipeline) or inside a Persistent Derived Table. 
   - **Filtering Data:** Check for SQL antipatterns e.g. using LIKE operator instead of a direct equal operator. The wildcard forces the database to read through every record to perform regex-style string evaluation, instead of leveraging fast lookup in the clustered or partition block.
   - **Dropdown filter suggestion:** For high-volume columns (e.g. user_id, transaction_id, etc), set suggest_persist_for: "24 hours" or entirely disable suggestions using suggestable: no on the dimension to present running heavy SELECT DISTINCT on high-cardinality columns
 

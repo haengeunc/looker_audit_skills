@@ -73,3 +73,42 @@ cases {
   expectations: "The query filters for execution time > 10 seconds and created date in the last 30 days."
   expectations: "If no slow queries are found, agent clearly states this."
 }
+
+cases {
+  name: "find_inactive_accounts"
+  prompt: "Identify all user accounts in the instance that have not logged in for the last 90 days."
+  expectations: "Agent returns a list of inactive users."
+  expectations: "The query filters for `user.last_login_date` before 90 days ago."
+  expectations: "If no inactive accounts are found, agent clearly states this."
+}
+
+cases {
+  name: "find_inactive_content"
+  prompt: "List dashboards in the instance that have not been queried or viewed in the last 90 days."
+  expectations: "Agent returns a list of inactive dashboards."
+  expectations: "The query checks `history.query_run_count` is 0 and dashboard creation date or looks at history table."
+  expectations: "If no inactive content is found, agent clearly states this."
+}
+
+cases {
+  name: "find_schedule_hotspots"
+  prompt: "Analyze the scheduled jobs to identify any hotspots or peak hours where too many jobs are running concurrently."
+  expectations: "Agent identifies hours of the day with high scheduled job counts."
+  expectations: "If no hotspots are evident, agent clearly states this."
+}
+
+cases {
+  name: "find_orphaned_schedules"
+  prompt: "List any scheduled plans where the owner of the schedule is currently disabled."
+  expectations: "Agent returns a list of orphaned schedules."
+  expectations: "The query filters for `user.is_disabled` equal to 'Yes'."
+  expectations: "If no orphaned schedules are found, agent clearly states this."
+}
+
+cases {
+  name: "find_unused_explores"
+  prompt: "Identify Explores in the instance that have had zero usage in the last 90 days."
+  expectations: "Agent returns a list of unused explores."
+  expectations: "The query checks `history.query_run_count` or similar metrics."
+  expectations: "If no unused explores are found, agent clearly states this."
+}
