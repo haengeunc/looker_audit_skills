@@ -96,8 +96,7 @@ Review Scheduled Plan System Activity Explore:
 - **Schedules:**
   - Check for scheduled job count and scheduled plan count across hours of day to identify if there is any hotspot with peak activity (e.g. midnight or 6-9am)
   - Find any orphaned schedules without owners, or failing scheduleles causing unnecessary drain on GKE memory and cluster resources
-- **Unused LookML, Dashboard and Looks:**
-  - Identify and purge unused models, explores, joins, and fields
+- **Unused Dashboard and Looks:**
   - Clean up and deprecate dashboard and looks that haven’t been used in the last 90 days
   - Identify any contents with “test”, “copy” or “draft” in the title and review if they need to be deleted.
   - Personal folder housekeeping - keep a personal folder for the development/ sandbox exploration stage only. Use a shared folder for production stages that should be managed by BI team. Schedule contents for deletion if not being used.

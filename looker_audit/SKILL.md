@@ -2,7 +2,7 @@
 name: looker-audit
 description: >-
   Audits a Looker instance for performance, governance, and cleanup opportunities.
-  Use when analyzing dashboard performance, identifying unused LookML components,
+  Use when analyzing dashboard performance, identifying anti-best practices,
   checking for excessive table calculations, or auditing datagroup health.
   Don't use for general Looker onboarding or creating new dashboards.
 ---
@@ -105,28 +105,7 @@ Identify slow queries across Explores, Dashboards, and Looks to pinpoint optimiz
   echo '{"model":"system__activity","view":"history","fields":["history.created_time","history.source","history.runtime","query.model","query.view","user.name"],"filters":{"history.runtime":">10","history.created_date":"30 days","history.source":"explore,dashboard,look"},"sorts":["history.runtime desc"],"limit":"50"}' | looker-cli api query run_inline_query json - | jq
   ```
 
-### 3. Unused LookML Components (Last 90 Days)
-Clean up debt by removing components that aren't being used. Consider Explores/Fields with 0 usage, or Models with very low usage (< 10 queries).
-
-- **Workflow**: Rely **exclusively** on System Activity for identifying usage. Do **NOT** scan LookML files to verify usage history.
-
-- **Unused Fields**:
-  ```bash
-  echo '{"model":"system__activity","view":"field_usage","fields":["field_usage.model","field_usage.explore","field_usage.field"],"filters":{"field_usage.times_used":"0"},"limit":"100"}' | looker-cli api query run_inline_query json - | jq
-  ```
-- **Unused/Low Usage Explores**:
-  ```bash
-  echo '{"model":"system__activity","view":"history","fields":["query.model","query.view","history.query_run_count"],"filters":{"history.created_date":"90 days"},"sorts":["history.query_run_count asc"],"limit":"50"}' | looker-cli api query run_inline_query json - | jq
-  ```
-- **Unused Joins**: Deduce by finding Views with 0 field usage in an Explore.
-  ```bash
-  echo '{"model":"system__activity","view":"field_usage","fields":["field_usage.explore","field_usage.view","field_usage.times_used"],"filters":{"field_usage.times_used":"0"},"limit":"100"}' | looker-cli api query run_inline_query json - | jq
-  ```
-
-> [!NOTE]
-> **Alternative: CLI Vacuum**: You can also use `looker-cli health vacuum explores` or `looker-cli health vacuum models` to identify unused components directly via the CLI. This can be more convenient than custom inline queries, though it may take longer to execute on large instances.
-
-### 4. Pipeline & Cache Health
+### 3. Pipeline & Cache Health
 
 Ensure data is moving and caching efficiently. Check for stale data (models where max build time is older than DB's max update time).
 
@@ -145,7 +124,7 @@ Ensure data is moving and caching efficiently. Check for stale data (models wher
   echo '{"model":"system__activity","view":"history","fields":["history.result_source","history.query_run_count"],"pivots":["history.result_source"],"filters":{"history.result_source":"-NULL","history.created_date":"30 days"},"sorts":["history.result_source"],"limit":"50"}' | looker-cli api query run_inline_query json - | jq
   ```
 
-### 5. User, Content, and Schedule Management
+### 4. User, Content, and Schedule Management
 Audit the instance for inactive assets, orphaned schedules, and schedule hotspots using System Activity. Look for high-volume schedules (> 1/hr) or stale schedules (not run in 30 days).
 
 - **Inactive Accounts (No Login in 90 Days)**:
@@ -161,12 +140,12 @@ Audit the instance for inactive assets, orphaned schedules, and schedule hotspot
 
 - **Draft/Test/Copy Content (Dashboards)**:
   ```bash
-  echo '{"model":"system__activity","view":"dashboard","fields":["dashboard.id","dashboard.title"],"filters":{"dashboard.title":"%test%,%copy%,%draft%"},"limit":"50"}' | looker-cli api query run_inline_query json - | jq
+ echo '{"model":"system__activity","view":"dashboard","fields":["dashboard.id","dashboard.title"],"filters":{"dashboard.title":"%test%,%copy%,%draft%","dashboard.moved_to_trash":"No"},"limit":"50"}' | looker-cli api query run_inline_query json - | jq
   ```
 
 - **Draft/Test/Copy Content (Looks)**:
   ```bash
-  echo '{"model":"system__activity","view":"look","fields":["look.id","look.title"],"filters":{"look.title":"%test%,%copy%,%draft%"},"limit":"50"}' | looker-cli api query run_inline_query json - | jq
+  echo '{"model":"system__activity","view":"look","fields":["look.id","look.title"],"filters":{"look.title":"%test%,%copy%,%draft%","look.deleted_date":"NULL"},"limit":"50"}' | looker-cli api query run_inline_query json - | jq
   ```
 
 
@@ -193,9 +172,6 @@ Audit the instance for inactive assets, orphaned schedules, and schedule hotspot
 
 - **Piping JSON**: Always use `echo '...' | looker-cli ... json -` to pass inline JSON to `run_inline_query`. Do NOT pass the JSON string directly as an argument, or you will get a "file name too long" error.
 - **Filter Wildcards**: Use `%` (SQL style) instead of `*` for string filters in `run_inline_query` on System Activity (e.g., `%error%`).
-- **Timeframes**: The `history` table is time-bound. A field or explore showing as "unused" in 90 days might still be used for annual reporting. Verify before deleting.
-- **Hidden Fields**: `hidden: yes` fields might still be used in joins or calculations. Do not delete without checking dependencies.
-- **Unused Fields**: fields identified as not used might still be used in other explores via hub & spoke model. Check if the fields are being referenced via `extends` or `refinements` in spoke repositories.
 - **Holistic Review**: You must analyze the instance or repositories as a whole to provide a holistic review.
 - **Anti-Hallucination Guardrail**: NEVER hallucinate or assume data. Always run the query first and report only the actual results. If no data matches, report that explicitly.
 

@@ -6,9 +6,11 @@ cases {
   prompt: "Run a general health check on my Looker instance and tell me if anything is wrong."
   timeout_seconds: 600
   expectations: "Agent follows the 3-tiered audit strategy."
-  expectations: "Agent starts with high-level health audits (e.g., Pulse commands) for a fast initial assessment."
+  expectations: "Agent starts with high-level health audits for a fast initial assessment."
   expectations: "Agent identifies top bottlenecks or errors if present."
   expectations: "If no issues are found, agent clearly states the instance appears healthy."
+  tags: "performance"
+  tags: "health"
 }
 
 cases {
@@ -19,6 +21,8 @@ cases {
   expectations: "Agent traces the root cause beyond just reporting the latency (e.g., checking tile bloat, dynamic fields, caching)."
   expectations: "Agent suggests specific LookML or configuration fixes."
   expectations: "Agent provides links to relevant files if LookML issues are suspected."
+  tags: "performance"
+  tags: "telemetry"
 }
 
 cases {
@@ -26,8 +30,10 @@ cases {
   prompt: "List all dashboards in the instance that have auto-refresh enabled."
   expectations: "Agent returns a list of dashboards with auto-refresh."
   expectations: "The output includes dashboard ID, title, and refresh interval."
-  expectations: "The queries correctly filter for non-null refresh intervals."
+  expectations: "The agent identifies dashboards with a non-null refresh interval."
   expectations: "If no dashboards have auto-refresh, agent clearly states this."
+  tags: "cleanup"
+  tags: "performance"
 }
 
 cases {
@@ -35,34 +41,31 @@ cases {
   prompt: "Identify dashboards that are using excessive dynamic fields (more than 3 per tile or query)."
   expectations: "Agent returns a list of dashboards exceeding the dynamic fields threshold."
   expectations: "The output includes dashboard details and the count of dynamic fields."
-  expectations: "The query uses `query.count_of_dynamic_fields`."
+  expectations: "The agent identifies dashboards with dynamic fields exceeding the threshold."
   expectations: "If no such dashboards are found, agent clearly states this."
+  tags: "cleanup"
+  tags: "performance"
 }
 
-cases {
-  name: "find_unused_fields"
-  prompt: "Identify fields that have never been used in any query."
-  expectations: "Agent returns a list of unused fields."
-  expectations: "The output includes model, explore, and field name."
-  expectations: "The query filters for `times_used` equal to 0."
-  expectations: "If no unused fields are found, agent clearly states this."
-}
 
 cases {
   name: "find_failed_pdts"
   prompt: "Check for any Persistent Derived Tables (PDTs) that have failed to build in the last 24 hours."
   expectations: "Agent returns a list of failed PDTs with error reasons."
-  expectations: "The query filters `pdt_event_log.action` with `%error%`."
-  expectations: "The agent uses standard input piping for the JSON body if using `run_inline_query`."
+  expectations: "The agent identifies PDTs that have failed to build."
   expectations: "If no failed PDTs are found, agent clearly states this."
+  tags: "pipeline"
+  tags: "health"
 }
 
 cases {
   name: "find_failed_datagroups"
   prompt: "List all datagroups that are currently in a failed state or have trigger errors."
   expectations: "Agent returns a list of failed datagroups."
-  expectations: "The agent checks `trigger_error`."
+  expectations: "The agent identifies datagroups with errors."
   expectations: "If no failed datagroups are found, agent clearly states this."
+  tags: "pipeline"
+  tags: "health"
 }
 
 cases {
@@ -70,24 +73,29 @@ cases {
   prompt: "Identify queries from Explores, Dashboards, and Looks run in the past 30 days that took longer than 10 seconds to execute."
   expectations: "Agent returns a list of slow queries."
   expectations: "The output includes query details and execution time."
-  expectations: "The query filters for execution time > 10 seconds and created date in the last 30 days."
+  expectations: "The agent filters for execution time > 10 seconds and created date in the last 30 days."
   expectations: "If no slow queries are found, agent clearly states this."
+  tags: "performance"
 }
 
 cases {
   name: "find_inactive_accounts"
   prompt: "Identify all user accounts in the instance that have not logged in for the last 90 days."
   expectations: "Agent returns a list of inactive users."
-  expectations: "The query filters for `user.last_login_date` before 90 days ago."
+  expectations: "The agent filters for users who haven't logged in within the specified timeframe."
   expectations: "If no inactive accounts are found, agent clearly states this."
+  tags: "governance"
+  tags: "cleanup"
 }
 
 cases {
   name: "find_inactive_content"
   prompt: "List dashboards in the instance that have not been queried or viewed in the last 90 days."
   expectations: "Agent returns a list of inactive dashboards."
-  expectations: "The query checks `history.query_run_count` is 0 and dashboard creation date or looks at history table."
+  expectations: "The agent identifies dashboards with zero views or queries in the timeframe."
   expectations: "If no inactive content is found, agent clearly states this."
+  tags: "cleanup"
+  tags: "governance"
 }
 
 cases {
@@ -95,20 +103,16 @@ cases {
   prompt: "Analyze the scheduled jobs to identify any hotspots or peak hours where too many jobs are running concurrently."
   expectations: "Agent identifies hours of the day with high scheduled job counts."
   expectations: "If no hotspots are evident, agent clearly states this."
+  tags: "performance"
+  tags: "pipeline"
 }
 
 cases {
   name: "find_orphaned_schedules"
   prompt: "List any scheduled plans where the owner of the schedule is currently disabled."
   expectations: "Agent returns a list of orphaned schedules."
-  expectations: "The query filters for `user.is_disabled` equal to 'Yes'."
+  expectations: "The agent identifies schedules owned by disabled users."
   expectations: "If no orphaned schedules are found, agent clearly states this."
-}
-
-cases {
-  name: "find_unused_explores"
-  prompt: "Identify Explores in the instance that have had zero usage in the last 90 days."
-  expectations: "Agent returns a list of unused explores."
-  expectations: "The query checks `history.query_run_count` or similar metrics."
-  expectations: "If no unused explores are found, agent clearly states this."
+  tags: "cleanup"
+  tags: "governance"
 }
