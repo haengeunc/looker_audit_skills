@@ -240,6 +240,7 @@ Audit the instance for inactive assets, orphaned schedules, and schedule hotspot
 
 When compiling the audit report, ensure that **Recommendations & Best Practices** is **NOT generic**. It must be bespoke to the findings and provide specific examples or snippet code, and direct link to dashboards/ folder/ lookml files where relevant.
 
+- **Report File Name**: The report artifact MUST be named using the convention `audit_report_[instance_name]_[timestamp].md` (e.g., `audit_report_gcpl264_202607091530.md`). Sanitize the instance name to remove special characters and use a clean timestamp format.
 - **Report Metadata**: At the top of the report, you **MUST** include key details:
   - **Timestamp**: The exact date and time when the audit was performed in a user-friendly format (e.g., `2026-07-09 5:30PM`).
   - **Looker Instance**: The URL of the Looker instance.
