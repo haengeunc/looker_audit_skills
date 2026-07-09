@@ -84,9 +84,9 @@ Excessive complexity on dashboards leads to browser lag and poor user experience
   ```
 - **Dynamic Fields**: Excessive dynamic fields (Table Calculations, Custom Fields) bypass LookML governance and strain browser memory.
   - **CRITICAL**: Do NOT scan LookML files for these; they are defined at the dashboard/tile level. You **MUST** use this **System Activity Inline Query** exclusively.
-  - **Concern Thresholds**: > 3 per tile, > 10 per dashboard.
+  - **Concern Thresholds**: > 2 per tile.
   ```bash
-  echo '{"model":"system__activity","view":"dashboard","fields":["dashboard.id","dashboard.title","query.count_of_dynamic_fields"],"filters":{"query.count_of_dynamic_fields":">3"},"sorts":["query.count_of_dynamic_fields desc"],"limit":"50"}' | looker-cli api query run_inline_query json - | jq
+  echo '{"model":"system__activity","view":"dashboard","fields":["dashboard.id","dashboard.title","query.count_of_dynamic_fields"],"filters":{"query.count_of_dynamic_fields":">2"},"sorts":["query.count_of_dynamic_fields desc"],"limit":"50"}' | looker-cli api query run_inline_query json - | jq
   ```
 - **Merged Queries**: Merged queries bypass LookML joins and can be slow. Identify dashboards and Looks currently using them.
   ```bash
@@ -167,6 +167,18 @@ Audit the instance for inactive assets, orphaned schedules, and schedule hotspot
 > [!NOTE]
 > **Definition-Based Analysis via CLI**: You can also use `looker-cli api scheduledplan all_scheduled_plans` to inspect schedule definitions directly. This is useful for analyzing `crontab` patterns to detect hotspots or checking `user_id` to identify potentially orphaned schedules (cross-reference with disabled users). However, to check **historical failures or execution history**, you MUST use the System Activity `scheduled_job` queries above.
 
+## 📝 Reporting Guidelines & Bespoke Recommendations
+
+When compiling the audit report, ensure that **Recommendations & Best Practices** is **NOT generic**. It must be bespoke to the findings and provide specific examples or snippet code, and direct link to dashboards/ folder/ lookml files where relevant.
+
+- **Report Metadata**: At the top of the report, you **MUST** include key details:
+  - **Timestamp**: The exact date and time when the audit was performed in a user-friendly format (e.g., `2026-07-09 5:30PM`).
+  - **Looker Instance**: The URL of the Looker instance.
+  - **Auditor**: The name of the agent and the model used (e.g., `Antigravity (Powered by Gemini 3.1 Flash)`).
+- **Avoid Generic Statements**: Do not just say "Enforce Primary Keys". Instead, say "View `orders` in project `X` is missing a primary key. Add `primary_key: yes` to dimension `id`."
+- **Provide Snippets**: Include code snippets demonstrating the fix.
+- **Contextualize**: Link the recommendation to the specific metric or error found (e.g., "The explore `unoptimized_orders_simulation` is slow because of X. Optimize it by Y...").
+- **Direct References**: Use the file paths and line numbers discovered during the audit to construct direct links (e.g., `[users.view.lkml](file:///projects/looker_mcp_demo/views/users.view.lkml#L10)`).
 
 ## 🛡️ Best Practices & Gotchas
 
