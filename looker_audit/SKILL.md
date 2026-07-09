@@ -176,10 +176,12 @@ When compiling the audit report, ensure that **Recommendations & Best Practices*
   - **Timestamp**: The exact date and time when the audit was performed in a user-friendly format (e.g., `2026-07-09 5:30PM`).
   - **Looker Instance**: The URL of the Looker instance.
   - **Auditor**: The name of the agent and the model used (e.g., `Antigravity (Powered by Gemini 3.1 Flash)`).
+- **Quantify Findings (CRITICAL)**: Do NOT use vague terms like "many" or "several". You **MUST** state the exact count of items found (e.g., "42 inactive accounts", "18 dashboards with 'test' in title").
+- **Detail Schedule Hotspots**: When reporting schedule hotspots, specify the exact hour(s) and the volume of jobs (e.g., "Hotspot identified at **8:00 AM** with **150 scheduled jobs**").
 - **Avoid Generic Statements**: Do not just say "Enforce Primary Keys". Instead, say "View `orders` in project `X` is missing a primary key. Add `primary_key: yes` to dimension `id`."
 - **Provide Snippets**: Include code snippets demonstrating the fix.
 - **Contextualize**: Link the recommendation to the specific metric or error found (e.g., "The explore `unoptimized_orders_simulation` is slow because of X. Optimize it by Y...").
-- **Direct References (CRITICAL)**: You **MUST** generate explicit hyperlinks for all findings, recommendations, and LookML files mentioned in the report. Use the Looker instance URL base, file paths, and line numbers discovered during the audit to construct direct links to the Looker UI (e.g., `[users.view.lkml](https://<looker-instance>/projects/looker_mcp_demo/files/views/users.view.lkml#L10)` or `[Dashboard Performance](https://<looker-instance>/dashboards/14)`). Do NOT just list file names or identifiers without links.
+- **Direct References (CRITICAL)**: You **MUST** generate explicit hyperlinks for all findings, recommendations, and LookML files mentioned in the report. Use the Looker instance URL base, file paths, and line numbers discovered during the audit to construct direct links to the Looker UI (e.g., `[users.view.lkml](https://<looker-instance>/projects/looker_mcp_demo/files/views/users.view.lkml#L10)` or `[Dashboard Performance](https://<looker-instance>/dashboards/14)`). If referring to System Activity Explores, provide the link to that explore. Do NOT just list file names or identifiers without links.
 
 ## 🛡️ Best Practices & Gotchas
 
