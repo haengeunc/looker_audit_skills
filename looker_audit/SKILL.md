@@ -20,9 +20,10 @@ This skill guides you through auditing a Looker instance using `looker-cli` and 
 >    - **Scaling Guardrail**: Before running loops over project files, you MUST check the total number of files. If the total number of view files exceeds **50**, you **MUST ask the user** to specify which projects or files should be prioritized. Do NOT proceed with exhaustive loops on large codebases without explicit user direction.
 > 5. **Graceful Degradation**: If the API fails to return file paths or details (e.g., 404), **STOP**. Report the violation using the identifiers you have (View Name, Model Name, Dashboard ID). Do **NOT** pivot to local filesystem searches.
 > 6. **No Custom Pipelines**: Use inline queries directly. Do **NOT** write Python scripts or pipelines.
+> 7. **Comprehensive Checklist Coverage**: You **MUST** execute queries and review **ALL** sections defined in the **Audit Checklist**. Do NOT skip sections unless explicitly instructed by the user. Thoroughness is critical.
 
 
-## 🔍 Step 0: Connection Verification
+## 🔍 Step 0: Looker CLI Connection Verification
 Before starting any audit, verify that you are connected and authenticated to the Looker instance.
 ```bash
 looker-cli user me
@@ -178,7 +179,7 @@ When compiling the audit report, ensure that **Recommendations & Best Practices*
 - **Avoid Generic Statements**: Do not just say "Enforce Primary Keys". Instead, say "View `orders` in project `X` is missing a primary key. Add `primary_key: yes` to dimension `id`."
 - **Provide Snippets**: Include code snippets demonstrating the fix.
 - **Contextualize**: Link the recommendation to the specific metric or error found (e.g., "The explore `unoptimized_orders_simulation` is slow because of X. Optimize it by Y...").
-- **Direct References**: Use the Looker instance URL base, file paths, and line numbers discovered during the audit to construct direct links to the Looker UI (e.g., `[users.view.lkml](https://<looker-instance>/projects/looker_mcp_demo/files/views/users.view.lkml#L10)`).
+- **Direct References (CRITICAL)**: You **MUST** generate explicit hyperlinks for all findings, recommendations, and LookML files mentioned in the report. Use the Looker instance URL base, file paths, and line numbers discovered during the audit to construct direct links to the Looker UI (e.g., `[users.view.lkml](https://<looker-instance>/projects/looker_mcp_demo/files/views/users.view.lkml#L10)` or `[Dashboard Performance](https://<looker-instance>/dashboards/14)`). Do NOT just list file names or identifiers without links.
 
 ## 🛡️ Best Practices & Gotchas
 
