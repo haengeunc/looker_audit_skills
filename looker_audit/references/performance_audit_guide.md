@@ -44,7 +44,7 @@ The Looker query execution lifecycle is divided into four distinct, sequential p
     - Refactor data joins into a granular many_to_one orientation (Looker can run simpler and faster native SQL without leveraging Symmetric Aggregates).
     - Avoid full outer join as this forces Looker to scan both entire tables and ignores partition and cluster pruning on both sides of the join.
   - **Aggregation:**
-    - Implement Aggregate Awareness to build database roll-ups for high-volume tiles e.g. raw records to the daily or hourly granularity.
+    - Implement **Aggregate Awareness** to build database roll-ups for high-volume tiles e.g. raw records to the daily or hourly granularity.
   - **Primary key:** Check for any dynamic function e.g. ROW_NUMBER() or concatenation in primary keys defined directly in LookML views - this forces Looker to execute manipulation on every single row inside subqueries. Recommend using base database joins instead (in upstream ETL pipeline) or inside a Persistent Derived Table. 
   - **Filtering Data:** Check for SQL antipatterns e.g. using LIKE operator instead of a direct equal operator. The wildcard forces the database to read through every record to perform regex-style string evaluation, instead of leveraging fast lookup in the clustered or partition block.
   - **Dropdown filter suggestion:** For high-volume columns (e.g. user_id, transaction_id, etc), set suggest_persist_for: "24 hours" or entirely disable suggestions using suggestable: no on the dimension to present running heavy SELECT DISTINCT on high-cardinality columns
@@ -65,11 +65,12 @@ The Looker query execution lifecycle is divided into four distinct, sequential p
 - Review PDT event log and align caching policies (datagroups) strictly with upstream ELT/ETL pipelines to stop users from continuously hitting the raw database tables unnecessarily.
 
 - **Recommendations:**
-  - Ensure that Persistent Derived Tables (PDTs) explicitly declare partition and cluster keys (partition_keys and cluster_keys) that map directly to the underlying physical table structures of the data warehouse
+  - Ensure that Persistent Derived Tables (PDTs) explicitly declare partition and cluster keys (partition_keys and cluster_keys) that map directly to the underlying physical table structures of the data warehouse.
+  - Use **Incremental PDTs** where applicable to reduce build times and database load for large datasets.
   - Avoid building PDT with liquid - derived tables with liquid should NOT be persisted as this can cause unmanageable table variations in the database. Instead, push the dynamic liquid out of the PDT and apply in the View or Explore level.
   - If data is loaded less frequently than every hour, implement event-based datagroups that trigger builds when new data is available.
   - If end-users are not querying “real-time” data, consider reducing the refresh frequency of your PDTs and staggering their builds throughout the day. 
-  - Scan the database connection settings to ensure PDTs leverage warehouse partitioning or clustering
+  - Scan the database connection settings to ensure PDTs leverage warehouse partitioning or clustering.
 
 *(Use `SKILL.md` for actionable CLI commands to review failed PDTs and datagroups)*
 
@@ -102,3 +103,20 @@ Review Scheduled Plan System Activity Explore:
   - Personal folder housekeeping - keep a personal folder for the development/ sandbox exploration stage only. Use a shared folder for production stages that should be managed by BI team. Schedule contents for deletion if not being used.
 
 *(See `SKILL.md` for actionable queries to identify unused content)*
+
+## 🛡️ Remediation Workflow (Next Steps)
+
+1.  **Identify**: Use System Activity (via `SKILL.md` queries) to detect antipatterns (e.g., Slow Queries, Heavy Dashboards).
+2.  **Isolate**: Use Query Metrics or Job Inspection to find the root cause (e.g., Missing Index, Bad Join).
+3.  **Refactor**: Apply best practices (e.g., convert to derived table, apply Aggregate Awareness).
+4.  **Validate**: Re-run the audit queries to confirm improvement.
+
+## 📚 Official References
+
+For deeper dives, refer to the following documentation:
+- [Optimize Looker Server Performance](https://docs.cloud.google.com/looker/docs/best-practices/how-to-optimize-looker-server-performance)
+- [Caching and Datagroups](https://docs.cloud.google.com/looker/docs/caching-and-datagroups)
+- [Derived Tables (PDTs)](https://docs.cloud.google.com/looker/docs/derived-tables)
+- [Incremental PDTs](https://docs.cloud.google.com/looker/docs/incremental-pdts)
+- [Aggregate Awareness](https://docs.cloud.google.com/looker/docs/aggregate_awareness)
+- [Optimize Database Setup for Looker](https://discuss.google.dev/t/best-practice-optimize-database-setup-for-reading-data/119153)
