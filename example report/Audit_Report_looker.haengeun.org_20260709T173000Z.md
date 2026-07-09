@@ -23,8 +23,8 @@
     *   **Models**: `bq-haengeun-ecommerce`, `thelook_ecommerce_haengeun_us` (Project: `haengeun_argolis_demo`)
     *   **Error**: `Query execution failed: - Unrecognized name: id`
     *   **Action**: Update the `sql_trigger` in the following files to use `order_id` instead of `id`.
-        *   [bq-haengeun-ecommerce.model.lkml](https://github.com/haengeunc/haengeun_argolis_demo/blob/main/models/bq-haengeun-ecommerce.model.lkml)
-        *   [thelook_ecommerce_haengeun_us.model.lkml](https://github.com/haengeunc/haengeun_argolis_demo/blob/main/models/thelook_ecommerce_haengeun_us.model.lkml)
+        *   [bq-haengeun-ecommerce.model.lkml](https://looker.haengeun.org/projects/haengeun_argolis_demo/files/models/bq-haengeun-ecommerce.model.lkml)
+        *   [thelook_ecommerce_haengeun_us.model.lkml](https://looker.haengeun.org/projects/haengeun_argolis_demo/files/models/thelook_ecommerce_haengeun_us.model.lkml)
         ```lookml
         datagroup: orders_datagroup {
           sql_trigger: SELECT max(order_id) FROM `bigquery-public-data.thelook_ecommerce.orders` ;;
@@ -42,13 +42,13 @@
 *   **Missing Primary Keys**:
     *   Views without primary keys can lead to incorrect symmetric aggregates and poor performance.
     *   **Violations**:
-        *   `looker_mcp_demo`: [dt_unoptimized_orders.view.lkml](https://github.com/haengeunc/looker_mcp_demo/blob/main/unoptimized/dt_unoptimized_orders.view.lkml)
+        *   `looker_mcp_demo`: [dt_unoptimized_orders.view.lkml](https://looker.haengeun.org/projects/looker_mcp_demo/files/unoptimized/dt_unoptimized_orders.view.lkml)
         *   `cymbal-pets`:
-            *   [product_facts.view.lkml](https://github.com/haengeunc/cymbal-pets-lookml-public/blob/main/derived_tables/product_facts.view.lkml)
-            *   [purchase_facts.view.lkml](https://github.com/haengeunc/cymbal-pets-lookml-public/blob/main/derived_tables/purchase_facts.view.lkml)
-            *   [supplier_facts.view.lkml](https://github.com/haengeunc/cymbal-pets-lookml-public/blob/main/derived_tables/supplier_facts.view.lkml)
-            *   [location.view.lkml](https://github.com/haengeunc/cymbal-pets-lookml-public/blob/main/extensions/location.view.lkml)
-            *   [regions.view.lkml](https://github.com/haengeunc/cymbal-pets-lookml-public/blob/main/extensions/regions.view.lkml)
+            *   [product_facts.view.lkml](https://looker.haengeun.org/projects/cymbal-pets/files/derived_tables/product_facts.view.lkml)
+            *   [purchase_facts.view.lkml](https://looker.haengeun.org/projects/cymbal-pets/files/derived_tables/purchase_facts.view.lkml)
+            *   [supplier_facts.view.lkml](https://looker.haengeun.org/projects/cymbal-pets/files/derived_tables/supplier_facts.view.lkml)
+            *   [location.view.lkml](https://looker.haengeun.org/projects/cymbal-pets/files/extensions/location.view.lkml)
+            *   [regions.view.lkml](https://looker.haengeun.org/projects/cymbal-pets/files/extensions/regions.view.lkml)
     *   **Action**: Define `primary_key: yes` on the unique identifier dimension for each of these views.
 
 *   **Excessive Dynamic Fields**:

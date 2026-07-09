@@ -178,7 +178,7 @@ When compiling the audit report, ensure that **Recommendations & Best Practices*
 - **Avoid Generic Statements**: Do not just say "Enforce Primary Keys". Instead, say "View `orders` in project `X` is missing a primary key. Add `primary_key: yes` to dimension `id`."
 - **Provide Snippets**: Include code snippets demonstrating the fix.
 - **Contextualize**: Link the recommendation to the specific metric or error found (e.g., "The explore `unoptimized_orders_simulation` is slow because of X. Optimize it by Y...").
-- **Direct References**: Use the file paths and line numbers discovered during the audit to construct direct links (e.g., `[users.view.lkml](file:///projects/looker_mcp_demo/views/users.view.lkml#L10)`).
+- **Direct References**: Use the Looker instance URL base, file paths, and line numbers discovered during the audit to construct direct links to the Looker UI (e.g., `[users.view.lkml](https://<looker-instance>/projects/looker_mcp_demo/files/views/users.view.lkml#L10)`).
 
 ## 🛡️ Best Practices & Gotchas
 
